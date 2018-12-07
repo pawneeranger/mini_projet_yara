@@ -32,7 +32,7 @@ case $1 in
 				echo $result
 				mv $path$file $quarantaine/$file
 			else
-				printf "\n\033[0;32m[i]\033[0m Fichier sain"
+				printf "\n\033[0;32m[i]\033[0m Fichier sain\n"
 				mv $path$file $sains/$file
 			fi
 		    done

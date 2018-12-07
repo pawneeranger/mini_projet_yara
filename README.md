@@ -10,3 +10,13 @@ cd ./mini_projet_yara
 chmod +x install.sh
 ./install.sh
 ```
+
+## Utilisation
+```bash
+Usage: ./launch.sh OPTION
+
+-h,	--help	print this help message
+-u,	--update	update the yara database
+-a,	--add	add custom rule to database
+-s,	--start	start the signature check tool
+```

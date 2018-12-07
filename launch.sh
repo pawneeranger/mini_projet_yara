@@ -4,21 +4,23 @@ quarantaine='./quarantaine'
 sains='./sains'
 
 #vérification des arguments
-if [ $# -eq 1 ]; then
-	if [ $1='--help' ] || [ $1='-h']; then
+case $1 in
+	'--help' | '-h')
 		echo "Usage: ./launch.sh OPTION"
 		printf "\n-h,\t--help\tprint this help message"
 		printf "\n-u,\t--update\tupdate the yara database"
 		printf "\n-a,\t--add\tadd custom rule to database"
 		printf "\n-s,\t--start\tstart the signature check tool"
 		echo ""
-	elif [ $1='--update' ] || [ $1='-u']; then
+		;;
+	'--update' | '-u')
 		#mise à jour yara db
 		cd yara_db
 		sudo rm -r rules/ 2>/dev/null
 		git clone https://github.com/Yara-Rules/rules.git
 		cd ..
-	elif [ $1='--start' ] || [ $1='-s']; then
+		;;
+	'--start' | '-s')
 		#surveillance du dossier de dépot
 		inotifywait -m $depot -e create -e moved_to |
 		    while read path action file; do
@@ -34,10 +36,12 @@ if [ $# -eq 1 ]; then
 				mv $path$file $sains/$file
 			fi
 		    done
-	elif [ $1='--add' ] || [ $1='-a']; then
+		;;
+	'--add' | '-a')
 		echo "pas encore dispo"
-	fi
-else
-	echo "Usage: ./launch.sh OPTION"
-	echo "Try \`--help\` for more options"
-fi
+		;;
+	*)
+		echo "Usage: ./launch.sh OPTION"
+		echo "Try \`--help\` for more options"
+		;;
+esac

@@ -3,6 +3,9 @@
 sudo apt update
 sudo apt install yara inotify-tools
 mkdir yara_db
+cd yara_db
+mkdir custom
+cd ..
 mkdir depot
 mkdir quarantaine
 mkdir sains

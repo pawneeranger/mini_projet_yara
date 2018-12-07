@@ -1,10 +1,14 @@
 #!/bin/bash
 
 sudo apt update
-sudo apt install yara clamav git
+sudo apt install yara inotify-tools
 mkdir yara_db
-cd yara_db
-git clone https://github.com/Yara-Rules/rules.git
+mkdir depot
+mkdir quarantaine
+mkdir sains
+chmod +x ./launch.sh
 printf "\n\n\033[0;32mINSTALATION TERMINEE\033[0m\n"
 printf "Pour lancer l'outil: "
-printf "\npython launch.py\n"
+printf "\n./launch.sh (depuis ce répertoire)\n"
+cd ..
+rm -rf install.sh

@@ -5,19 +5,20 @@ sains='./sains'
 
 #vérification des arguments
 if [ $# -eq 1 ]; then
-	if [ $1="--help" ] || [ $1="-h"]; then
+	if [ $1='--help' ] || [ $1='-h']; then
 		echo "Usage: ./launch.sh OPTION"
 		printf "\n-h,\t--help\tprint this help message"
 		printf "\n-u,\t--update\tupdate the yara database"
 		printf "\n-a,\t--add\tadd custom rule to database"
 		printf "\n-s,\t--start\tstart the signature check tool"
-	elif [ $1="--update" ] || [ $1="-u"]; then
+		echo ""
+	elif [ $1='--update' ] || [ $1='-u']; then
 		#mise à jour yara db
 		cd yara_db
 		sudo rm -r rules/ 2>/dev/null
 		git clone https://github.com/Yara-Rules/rules.git
 		cd ..
-	elif [ $1="--start" ] || [ $1="-s"]; then
+	elif [ $1='--start' ] || [ $1='-s']; then
 		#surveillance du dossier de dépot
 		inotifywait -m $depot -e create -e moved_to |
 		    while read path action file; do
@@ -33,7 +34,7 @@ if [ $# -eq 1 ]; then
 				mv $path$file $sains/$file
 			fi
 		    done
-	elif [ $1="--add" ] || [ $1="-a"]; then
+	elif [ $1='--add' ] || [ $1='-a']; then
 		echo "pas encore dispo"
 	fi
 else

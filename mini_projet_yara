@@ -1,0 +1,81 @@
+#!/bin/bash
+depot='/var/mini_projet_yara/depot'
+quarantaine='/var/mini_projet_yara/quarantaine'
+sains='/var/mini_projet_yara/sains'
+yaradb='/var/mini_projet_yara/yara_db'
+
+#vérification des arguments
+case $1 in
+	'--help' | '-h')
+		echo "Usage: mini_projet_yara OPTION"
+		printf "\n-h,\t--help\t\tprint this help message"
+		printf "\n-uy,\t--update-yara\tupdate the yara database"
+		printf "\n-uc,\t--update-clam\tupdate the clam-av database"
+		printf "\n-a,\t--add FILE\tadd custom rule to database"
+		printf "\n-s,\t--start\t\tstart the signature check tool"
+		echo ""
+		;;
+	'--update-yara' | '-uy')
+		#mise à jour yara db
+		sudo rm -r $yaradb/rules 2>/dev/null
+		cd $yaradb
+		git clone https://github.com/Yara-Rules/rules.git
+		cd rules
+		cp $yaradb/custom/* $yaradb/rules 2>/dev/null
+		cat $yaradb/rules/index_custom.yar >> $yaradb/rules/index.yar 2>/dev/null
+		;;
+	'--update-clam' | '-uc')
+		#mise à jour de clamav
+		sudo freshclam
+		cd $yaradb/rules
+		sigtool -u /var/lib/clamav/main.cvd
+		python3 $yaradb/clamav_to_yara3/clamav_to_yara3.py -f $yaradb/rules/main.ndb -o $yaradb/custom/clamav.yar
+		cp $yaradb/custom/clamav.yar $yaradb/rules/clamav.yar
+		echo "include \"./clamav.yar\"" >> $yaradb/custom/index_custom.yar
+		echo "include \"./clamav.yar\"" >> $yaradb/rules/index.yar
+		;;
+	'--start' | '-s')
+		#surveillance du dossier de dépot
+		inotifywait -m $depot -e create -e moved_to |
+		    while read path action file; do
+			result=$(yara $yaradb/rules/index.yar $path$file 2>/dev/null)
+			echo $result
+			results=$(echo $result | grep -scve '^\s*$')
+			if [ $results -eq 0 ]; then
+				printf "\n\033[0;32m[i]\033[0m File is safe\n"
+				mv $path$file $sains/$file
+			else
+				printf "\n\033[0;31m[!]\033[0m File moved to quarantine\n"
+				echo "Match found: "$result
+				mv $path$file $quarantaine/$file
+				chmod -x $quarantaine/$file
+			fi
+		    done
+		;;
+	'--add' | '-a')
+		#ajout d'un fichier de règle custom
+		if [ -z $2 ]; then
+			mini_projet_yara -h
+		else
+			cp /dev/null /tmp/testfile
+			result=$(yara $2 /tmp/testfile 2>&1 | grep -sce "")
+			if [ $result -eq 0 ]; then
+				#règle valide, on l'ajoute à la base
+				while [ -z $rulename ] || [ $rulename = "index" ]; do
+					read -p "Enter name for new rule (except \"index\"): " rulename
+				done
+				cp $2 $yaradb/rules/$rulename.yar
+				cp $2 $yaradb/custom/$rulename.yar
+				echo "include \"./$rulename.yar\"" >> $yaradb/custom/index_custom.yar
+				echo "include \"./$rulename.yar\"" >> $yaradb/rules/index.yar
+			else
+				#règle non valide
+				echo "Error: This rule is not compatible with Yara"
+			fi
+		fi
+		;;
+	*)
+		echo "Usage: mini_projet_yara OPTION"
+		echo "Try \`--help\` for more options"
+		;;
+esac

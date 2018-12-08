@@ -13,10 +13,11 @@ chmod +x install.sh
 
 ## Utilisation
 ```bash
-Usage: ./launch.sh OPTION
+Usage: mini_projet_yara OPTION
 
--h,	--help	print this help message
--u,	--update	update the yara database
--a,	--add	add custom rule to database
--s,	--start	start the signature check tool
+-h,	--help		print this help message
+-uy,	--update-yara	update the yara database
+-uc,	--update-clam	update the clam-av database
+-a,	--add FILE	add custom rule to database
+-s,	--start		start the signature check tool
 ```

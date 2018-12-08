@@ -13,6 +13,7 @@ case $1 in
 		printf "\n-uc,\t--update-clam\tupdate the clam-av database"
 		printf "\n-a,\t--add FILE\tadd custom rule to database"
 		printf "\n-s,\t--start\t\tstart the signature check tool"
+		printf "\n-dc,\t--delete-clam\tdelete clam-av database"
 		echo ""
 		;;
 	'--update-yara' | '-uy')
@@ -73,6 +74,13 @@ case $1 in
 				echo "Error: This rule is not compatible with Yara"
 			fi
 		fi
+		;;
+	'--delete-clam' | '-dc')
+		#suppression de la base clamav
+		rm $yaradb/rules/clamav.yar
+		rm $yaradb/custom/clamav.yar
+		sed '/clamav.yar/d' $yaradb/custom/index_custom.yar 1>/dev/null
+		sed '/clamav.yar/d' $yaradb/rules/index.yar 1>/dev/null
 		;;
 	*)
 		echo "Usage: mini_projet_yara OPTION"
